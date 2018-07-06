@@ -1,40 +1,28 @@
 package main
 
-import "errors"
+import (
+	"fmt"
+	"strings"
+)
 
-func GetCategoryID(client ClientInt, budgetName string, catName string) (string, error) {
-	budgets, err := client.ListBudgets()
+func SumPayees(c ClientInt, budgetID string, categoryID string) (map[string]float32, error) {
+	payees, err := FindPayees(c, budgetID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	var budgetID string
 
-	for _, b := range budgets {
-		if b.Name == budgetName {
-			budgetID = b.Id
-			break
+	trans, err := c.GetTransByCat(budgetID, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, t := range trans {
+		_, ok := payees[strings.TrimRight(t.PayeeName, " ")]
+		if ok {
+			payees[t.PayeeName] += (float32(t.TransactionSummary.Amount) / 1000)
+		} else {
+			fmt.Printf("Found a payee that wasn't in the map! [%s]", t.PayeeName)
 		}
 	}
-
-	if budgetID == "" {
-		return "", errors.New("Unable to find the budget: " + budgetName)
-	}
-
-	catWithGroup, err := client.ListCategories(budgetID)
-	if err != nil {
-		return "", err
-	}
-
-	var catID string
-	for _, c := range catWithGroup {
-		if c.Name == catName {
-			catID = c.Id
-		}
-	}
-
-	if catID == "" {
-		return "", errors.New("Unable to find the category: " + catName)
-	}
-
-	return catID, nil
+	return payees, nil
 }
