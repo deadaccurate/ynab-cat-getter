@@ -63,6 +63,24 @@ func createCategories() []ynab.CategoryGroupWithCategories {
 				Name: "my-category",
 				Id:   "c-id",
 			},
+			Categories: []ynab.Category{
+				ynab.Category{
+					Id:   "internal-id",
+					Name: "internal",
+				},
+			},
+		},
+		ynab.CategoryGroupWithCategories{
+			CategoryGroup: ynab.CategoryGroup{
+				Name: "my-category2",
+				Id:   "c-id2",
+			},
+			Categories: []ynab.Category{
+				ynab.Category{
+					Id:   "internal-id2",
+					Name: "internal2",
+				},
+			},
 		},
 	}
 }
@@ -128,12 +146,12 @@ func TestGetCategory(t *testing.T) {
 		retCat:     createCategories(),
 	}
 
-	c, err := FindCategoryID(client, "my-budget", "my-category")
+	c, err := FindCategoryGroup(client, "my-budget", "my-category")
 	if err != nil {
 		t.Errorf("Error while getting category: %s", err)
 	}
-	if c != "c-id" {
-		t.Errorf("Category didn't equal fake one: %s", c)
+	if c.Id != "c-id" {
+		t.Errorf("Category didn't equal fake one: %s", c.Id)
 	}
 }
 
@@ -142,7 +160,7 @@ func TestGetCategoryErr(t *testing.T) {
 		listCatErr: true,
 		retBud:     createBudgets(),
 	}
-	_, err := FindCategoryID(cl, "my-budget", "blah")
+	_, err := FindCategoryGroup(cl, "my-budget", "blah")
 
 	if err == nil || err.Error() != "error categories" {
 		t.Errorf("Expected error category: %s", err.Error())
@@ -154,7 +172,7 @@ func TestGetCategoryCantFind(t *testing.T) {
 		retBud: createBudgets(),
 	}
 
-	_, err := FindCategoryID(cl, "my-budget", "blah")
+	_, err := FindCategoryGroup(cl, "my-budget", "blah")
 	if err == nil || !strings.Contains(err.Error(), "Unable to find the category") {
 		t.Errorf("Expected category error: %s", err.Error())
 	}
@@ -184,18 +202,10 @@ func TestGetPayees(t *testing.T) {
 
 func TestSumPayees(t *testing.T) {
 	c := &FakeClient{
-		listPayErr: true,
-	}
-
-	_, err := SumPayees(c, "blah", "blah")
-	if err == nil || err.Error() != "error payees" {
-		t.Error("Expected payee error for SumPayees")
-	}
-	c = &FakeClient{
 		transErr: true,
-		retPay:   createPayees(),
 	}
-	_, err = SumPayees(c, "b-id", "c-id")
+	cat := &createCategories()[0]
+	_, err := SumPayees(c, "b-id", cat)
 	if err == nil || err.Error() != "error transactions" {
 		t.Error("Expected transaction error")
 	}
@@ -205,7 +215,7 @@ func TestSumPayees(t *testing.T) {
 		retTrans: createTransactions(),
 	}
 
-	trans, err := SumPayees(c, "b-id", "c-id")
+	trans, err := SumPayees(c, "b-id", cat)
 	if err != nil {
 		t.Errorf("Received error from SumPayees: %s", err.Error())
 	}
@@ -223,15 +233,11 @@ func TestSumPayees(t *testing.T) {
 		retTrans: createTransName("crazy-payee"),
 	}
 
-	trans, err = SumPayees(c, "b-id", "c-id")
+	trans, err = SumPayees(c, "b-id", cat)
 	if err != nil {
 		t.Errorf("Received error for crazy transaction: %s", err.Error())
 	}
-	if val, ok := trans["my-payee"]; !ok {
-		t.Error("Payee wasn't found for crazy transaction test")
-	} else {
-		if val != 0 {
-			t.Errorf("Value should have been zero! %f", val)
-		}
+	if _, ok := trans["my-payee"]; ok {
+		t.Error("Payee was found for crazy transaction test")
 	}
 }

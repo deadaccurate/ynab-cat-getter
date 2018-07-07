@@ -29,7 +29,7 @@ func main() {
 	c := &ClientWrapper{ynab.NewDefaultClient(config.Key)}
 	bID, err := FindBudget(c, config.Budget)
 	checkErr(err)
-	cID, err := FindCategoryID(c, bID, config.Category)
+	cID, err := FindCategoryGroup(c, bID, config.Category)
 	checkErr(err)
 	payees, err := SumPayees(c, bID, cID)
 	checkErr(err)

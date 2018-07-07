@@ -1,28 +1,28 @@
 package main
 
 import (
-	"fmt"
 	"strings"
+
+	"github.com/davidsteinsland/ynab-go/ynab"
 )
 
-func SumPayees(c ClientInt, budgetID string, categoryID string) (map[string]float32, error) {
-	payees, err := FindPayees(c, budgetID)
-	if err != nil {
-		return nil, err
-	}
+func SumPayees(c ClientInt,
+	budgetID string,
+	group *ynab.CategoryGroupWithCategories) (map[string]float32, error) {
 
-	trans, err := c.GetTransByCat(budgetID, categoryID)
-	if err != nil {
-		return nil, err
-	}
+	payees := make(map[string]float32)
+	for _, cat := range group.Categories {
+		trans, err := c.GetTransByCat(budgetID, cat.Id)
+		if err != nil {
+			return nil, err
+		}
 
-	for _, t := range trans {
-		_, ok := payees[strings.TrimRight(t.PayeeName, " ")]
-		if ok {
-			payees[t.PayeeName] += (float32(t.TransactionSummary.Amount) / 1000)
-		} else {
-			fmt.Printf("Found a payee that wasn't in the map! [%s]", t.PayeeName)
+		for _, t := range trans {
+			val, _ := payees[strings.TrimRight(t.PayeeName, " ")]
+
+			payees[t.PayeeName] = val + (float32(t.TransactionSummary.Amount) / 1000)
 		}
 	}
+
 	return payees, nil
 }

@@ -54,26 +54,29 @@ func FindBudget(client ClientInt, budget string) (string, error) {
 	return budgetID, nil
 }
 
-func FindCategoryID(client ClientInt, budgetID string, catName string) (string, error) {
+func FindCategoryGroup(client ClientInt,
+	budgetID string,
+	catName string) (*ynab.CategoryGroupWithCategories, error) {
 	catWithGroup, err := client.ListCategories(budgetID)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var catID string
+	var group *ynab.CategoryGroupWithCategories
 
 	for _, c := range catWithGroup {
 
 		if strings.TrimRight(c.Name, " ") == catName {
-			catID = c.Id
+			group = &c
+			break
 		}
 	}
 
-	if catID == "" {
-		return "", errors.New("Unable to find the category: " + catName)
+	if group == nil {
+		return nil, errors.New("Unable to find the category: " + catName)
 	}
 
-	return catID, nil
+	return group, nil
 }
 
 func FindPayees(c ClientInt, budgetID string) (map[string]float32, error) {
