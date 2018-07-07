@@ -37,8 +37,4 @@ func TestConfig(t *testing.T) {
 	if c.StartDate != "2000-01-01" {
 		t.Errorf("StartDate field was wrong: %s", c.StartDate)
 	}
-
-	if c.EndDate != "2001-01-01" {
-		t.Errorf("EndDate field was wrong: %s", c.EndDate)
-	}
 }

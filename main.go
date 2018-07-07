@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/davidsteinsland/ynab-go/ynab"
+	"github.com/deadaccurate/ynab-go/ynab"
 )
 
 func checkErr(err error) {
@@ -29,12 +29,12 @@ func main() {
 	c := &ClientWrapper{ynab.NewDefaultClient(config.Key)}
 	bID, err := FindBudget(c, config.Budget)
 	checkErr(err)
-	cID, err := FindCategoryGroup(c, bID, config.Category)
+	group, err := FindCategoryGroup(c, bID, config.Category)
 	checkErr(err)
-	payees, err := SumPayees(c, bID, cID)
+	payees, err := SumPayees(c, bID, group, config.StartDate)
 	checkErr(err)
 	for k, v := range payees {
-		fmt.Printf("payee: %s, total: %f\n", k, v)
+		fmt.Printf("%s, total: $%.2f\n", k, v)
 	}
 
 }

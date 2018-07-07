@@ -3,16 +3,17 @@ package main
 import (
 	"strings"
 
-	"github.com/davidsteinsland/ynab-go/ynab"
+	"github.com/deadaccurate/ynab-go/ynab"
 )
 
 func SumPayees(c ClientInt,
 	budgetID string,
-	group *ynab.CategoryGroupWithCategories) (map[string]float32, error) {
+	group *ynab.CategoryGroupWithCategories,
+	sinceDate string) (map[string]float32, error) {
 
 	payees := make(map[string]float32)
 	for _, cat := range group.Categories {
-		trans, err := c.GetTransByCat(budgetID, cat.Id)
+		trans, err := c.GetTransByCat(budgetID, cat.Id, sinceDate)
 		if err != nil {
 			return nil, err
 		}

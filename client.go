@@ -4,14 +4,14 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/davidsteinsland/ynab-go/ynab"
+	"github.com/deadaccurate/ynab-go/ynab"
 )
 
 type ClientInt interface {
 	ListBudgets() ([]ynab.BudgetSummary, error)
 	ListCategories(budgetID string) ([]ynab.CategoryGroupWithCategories, error)
 	ListPayees(budgetID string) ([]ynab.Payee, error)
-	GetTransByCat(budgetID string, categoryID string) ([]ynab.HybridTransaction, error)
+	GetTransByCat(budgetID string, categoryID string, sinceDate string) ([]ynab.HybridTransaction, error)
 }
 
 type ClientWrapper struct {
@@ -30,8 +30,8 @@ func (c *ClientWrapper) ListPayees(budgetID string) ([]ynab.Payee, error) {
 	return c.Client.PayeesService.List(budgetID)
 }
 
-func (c *ClientWrapper) GetTransByCat(budgetID string, categoryID string) ([]ynab.HybridTransaction, error) {
-	return c.Client.TransactionsService.GetByCategory(budgetID, categoryID)
+func (c *ClientWrapper) GetTransByCat(budgetID string, categoryID string, sinceDate string) ([]ynab.HybridTransaction, error) {
+	return c.Client.TransactionsService.GetByCategory(budgetID, categoryID, sinceDate)
 }
 
 func FindBudget(client ClientInt, budget string) (string, error) {

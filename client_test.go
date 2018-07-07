@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/davidsteinsland/ynab-go/ynab"
+	"github.com/deadaccurate/ynab-go/ynab"
 )
 
 type FakeClient struct {
@@ -40,7 +40,7 @@ func (f *FakeClient) ListPayees(budgetID string) ([]ynab.Payee, error) {
 	return f.retPay, nil
 }
 
-func (f *FakeClient) GetTransByCat(budgetID string, categoryID string) ([]ynab.HybridTransaction, error) {
+func (f *FakeClient) GetTransByCat(budgetID string, categoryID string, sinceDate string) ([]ynab.HybridTransaction, error) {
 	if f.transErr {
 		return nil, errors.New("error transactions")
 	}
@@ -205,7 +205,7 @@ func TestSumPayees(t *testing.T) {
 		transErr: true,
 	}
 	cat := &createCategories()[0]
-	_, err := SumPayees(c, "b-id", cat)
+	_, err := SumPayees(c, "b-id", cat, "")
 	if err == nil || err.Error() != "error transactions" {
 		t.Error("Expected transaction error")
 	}
@@ -215,7 +215,7 @@ func TestSumPayees(t *testing.T) {
 		retTrans: createTransactions(),
 	}
 
-	trans, err := SumPayees(c, "b-id", cat)
+	trans, err := SumPayees(c, "b-id", cat, "")
 	if err != nil {
 		t.Errorf("Received error from SumPayees: %s", err.Error())
 	}
@@ -233,7 +233,7 @@ func TestSumPayees(t *testing.T) {
 		retTrans: createTransName("crazy-payee"),
 	}
 
-	trans, err = SumPayees(c, "b-id", cat)
+	trans, err = SumPayees(c, "b-id", cat, "")
 	if err != nil {
 		t.Errorf("Received error for crazy transaction: %s", err.Error())
 	}
