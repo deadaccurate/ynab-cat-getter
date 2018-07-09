@@ -205,7 +205,7 @@ func TestSumPayees(t *testing.T) {
 		transErr: true,
 	}
 	cat := &createCategories()[0]
-	_, err := SumPayees(c, "b-id", cat, "")
+	_, _, err := SumPayees(c, "b-id", cat, "")
 	if err == nil || err.Error() != "error transactions" {
 		t.Error("Expected transaction error")
 	}
@@ -215,7 +215,7 @@ func TestSumPayees(t *testing.T) {
 		retTrans: createTransactions(),
 	}
 
-	trans, err := SumPayees(c, "b-id", cat, "")
+	trans, _, err := SumPayees(c, "b-id", cat, "")
 	if err != nil {
 		t.Errorf("Received error from SumPayees: %s", err.Error())
 	}
@@ -233,7 +233,7 @@ func TestSumPayees(t *testing.T) {
 		retTrans: createTransName("crazy-payee"),
 	}
 
-	trans, err = SumPayees(c, "b-id", cat, "")
+	trans, _, err = SumPayees(c, "b-id", cat, "")
 	if err != nil {
 		t.Errorf("Received error for crazy transaction: %s", err.Error())
 	}

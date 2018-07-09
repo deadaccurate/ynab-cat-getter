@@ -1,6 +1,7 @@
 package main
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/deadaccurate/ynab-go/ynab"
@@ -9,13 +10,13 @@ import (
 func SumPayees(c ClientInt,
 	budgetID string,
 	group *ynab.CategoryGroupWithCategories,
-	sinceDate string) (map[string]float32, error) {
+	sinceDate string) (map[string]float32, []string, error) {
 
 	payees := make(map[string]float32)
 	for _, cat := range group.Categories {
 		trans, err := c.GetTransByCat(budgetID, cat.Id, sinceDate)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		for _, t := range trans {
@@ -24,6 +25,14 @@ func SumPayees(c ClientInt,
 			payees[t.PayeeName] = val + (float32(t.TransactionSummary.Amount) / 1000)
 		}
 	}
+	var keys []string
 
-	return payees, nil
+	for k := range payees {
+		keys = append(keys, k)
+	}
+	if len(keys) > 0 {
+		sort.Strings(keys)
+	}
+
+	return payees, keys, nil
 }

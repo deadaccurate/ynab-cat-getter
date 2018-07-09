@@ -31,10 +31,12 @@ func main() {
 	checkErr(err)
 	group, err := FindCategoryGroup(c, bID, config.Category)
 	checkErr(err)
-	payees, err := SumPayees(c, bID, group, config.StartDate)
+	payees, sorted, err := SumPayees(c, bID, group, config.StartDate)
 	checkErr(err)
-	for k, v := range payees {
-		fmt.Printf("%s, total: $%.2f\n", k, v)
-	}
+	for _, k := range sorted {
+		if val, ok := payees[k]; ok {
+			fmt.Printf("%s, total: $%.2f\n", k, val)
+		}
 
+	}
 }
